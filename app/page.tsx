@@ -105,6 +105,7 @@ export default function HomePage() {
       applicant_name: String(form.get("applicant_name") ?? ""),
       applicant_email: String(form.get("applicant_email") ?? ""),
       applicant_country: String(form.get("applicant_country") ?? ""),
+      applicant_category: String(form.get("category") ?? "") || null,
       evidence_url: String(form.get("evidence_url") ?? "") || null,
       impact_summary: String(form.get("impact_summary") ?? ""),
     };
