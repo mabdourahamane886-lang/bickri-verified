@@ -8,9 +8,27 @@ const badgeUrl = "/badges/bickri-verified-badge.svg";
 type Country = { code: string; name: string; position: number };
 type Organization = { id: string; name: string; country: string | null; category: string | null; slug: string | null };
 
+const categoryOptions = [
+  ["agriculture", "Agriculture"],
+  ["énergie", "Énergie"],
+  ["déchets", "Déchets"],
+  ["eau", "Eau"],
+  ["mobilité", "Mobilité"],
+  ["notoriété", "Notoriété"],
+  ["artiste", "Artiste"],
+  ["auteur", "Auteur"],
+  ["entrepreneur", "Entrepreneur"],
+  ["expert", "Expert"],
+  ["formateur", "Formateur"],
+  ["créateur de contenu", "Créateur de contenu"],
+  ["personnalité publique", "Personnalité publique"],
+  ["autre profil humain", "Autre profil humain"],
+  ["autre", "Autre"],
+] as const;
+
 function AfricaPeopleIllustration() {
   return (
-    <svg className="people-svg" viewBox="0 0 760 620" role="img" aria-label="Deux jeunes adultes africains souriants, une femme tenant un téléphone, représentant la confiance et la collaboration">
+    <svg className="people-svg" viewBox="0 0 760 620" role="img" aria-label="Deux adultes africains souriants en harmonie, une femme tenant un téléphone pour représenter la confiance et la fiabilité">
       <defs>
         <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stopColor="#dff7be"/><stop offset="1" stopColor="#b7e486"/></linearGradient>
         <linearGradient id="shirtWoman" x1="0" x2="1"><stop offset="0" stopColor="#e45778"/><stop offset="1" stopColor="#b72e58"/></linearGradient>
@@ -44,9 +62,8 @@ function AfricaPeopleIllustration() {
         <path d="M69 190 Q125 167 181 191 L226 355 H17 Z" fill="url(#shirtMan)"/>
         <path d="M188 214 C231 225 248 262 255 300" fill="none" stroke="#7f4527" strokeWidth="24" strokeLinecap="round"/>
         <path d="M60 221 C35 246 24 271 17 298" fill="none" stroke="#7f4527" strokeWidth="24" strokeLinecap="round"/>
-        <path d="M218 295 Q245 286 260 303" fill="none" stroke="#fff" strokeWidth="5" strokeLinecap="round" opacity=".7"/>
       </g>
-      <g transform="translate(505 468)"><rect width="156" height="54" rx="27" fill="#fff" opacity=".94"/><image href={badgeUrl} width="38" height="38" x="12" y="8"/><text x="60" y="34" fontFamily="Arial" fontSize="16" fontWeight="700" fill="#17352e">Confiance vérifiée</text></g>
+      <g transform="translate(505 468)"><rect width="196" height="54" rx="27" fill="#fff" opacity=".94"/><image href={badgeUrl} width="38" height="38" x="12" y="8"/><text x="60" y="34" fontFamily="Arial" fontSize="16" fontWeight="700" fill="#17352e">Confiance vérifiée</text></g>
     </svg>
   );
 }
@@ -125,9 +142,10 @@ export default function HomePage() {
 
       <section id="annuaire" className="directory section-wrap">
         <div className="section-heading"><div><p className="eyebrow">L’annuaire panafricain</p><h2>Les acteurs vérifiés</h2></div><p className="section-intro">Filtrez par nom, catégorie ou pays et trouvez rapidement les profils reconnus.</p></div>
-        <div className="directory-tools"><label className="search-box"><span>⌕</span><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher une organisation" /></label><select value={country} onChange={(e) => setCountry(e.target.value)}><option value="all">Tous les pays d’Afrique</option>{countries.map((item) => <option key={item.code} value={item.name}>{item.name}</option>)}</select><select value={category} onChange={(e) => setCategory(e.target.value)}><option value="all">Toutes les catégories</option><option value="agriculture">Agriculture</option><option value="énergie">Énergie</option><option value="déchets">Déchets</option><option value="eau">Eau</option><option value="mobilité">Mobilité</option><option value="autre">Autre</option></select></div>
-        <div className="organization-grid">{filtered.map((org) => <article className="org-card" key={org.id}><div className="org-top"><span className="org-logo"><img src={badgeUrl} alt="" /></span><span className="verified">✓ Vérifié</span></div><h3>{org.name}</h3><p>{org.country ?? "Afrique"}</p><div className="org-meta"><span className="tag">{org.category ?? "Autre"}</span></div></article>)}</div>
-        {filtered.length === 0 && <p className="empty-state">Aucune organisation ne correspond à votre recherche.</p>}
+        <div className="directory-tools"><label className="search-box"><span>⌕</span><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher une organisation ou un profil" /></label><select value={country} onChange={(e) => setCountry(e.target.value)}><option value="all">Tous les pays d’Afrique</option>{countries.map((item) => <option key={item.code} value={item.name}>{item.name}</option>)}</select><select value={category} onChange={(e) => setCategory(e.target.value)}><option value="all">Toutes les catégories</option>{categoryOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div>
+        <div className="category-cloud">{categoryOptions.filter(([value]) => value !== "autre").map(([value, label]) => <button type="button" key={value} className={category === value ? "category-chip active" : "category-chip"} onClick={() => setCategory(category === value ? "all" : value)}>{label}</button>)}</div>
+        <div className="organization-grid">{filtered.map((org) => <article className="org-card" key={org.id}><div className="org-top"><span className="org-logo"><img src={badgeUrl} alt="" /></span><span className="verified">✓ Vérifié</span></div><h3>{org.name}</h3><p>{org.country ?? "Afrique"}</p><div className="org-meta"><span className="tag">{categoryOptions.find(([value]) => value === (org.category ?? "autre"))?.[1] ?? org.category ?? "Autre"}</span></div></article>)}</div>
+        {filtered.length === 0 && <p className="empty-state">Aucune organisation ou profil ne correspond à votre recherche.</p>}
       </section>
 
       <section id="pays" className="countries section-light">
@@ -142,7 +160,7 @@ export default function HomePage() {
 
       <section id="obtenir" className="cta"><div className="section-wrap"><p className="eyebrow">Rejoindre le programme</p><h2>Votre impact mérite<br /><em>d’être reconnu.</em></h2><a className="button button-light" href="#candidature">Déposer une candidature ↗</a></div></section>
 
-      <section id="candidature" className="apply"><div className="section-wrap"><p className="eyebrow">Candidature</p><h2>Demander le Badge Vert Africain</h2><form onSubmit={submitApplication}><div className="form-grid"><label>Nom de l’organisation<input name="applicant_name" required maxLength={160} /></label><label>Email<input name="applicant_email" type="email" required /></label></div><label>Pays<select name="applicant_country" required defaultValue=""><option value="" disabled>Choisir votre pays</option>{countries.map((item) => <option key={item.code} value={item.name}>{item.name}</option>)}</select></label><label>Lien vers une preuve ou votre site<input name="evidence_url" type="url" placeholder="https://..." /></label><label>Présentez votre impact<textarea name="impact_summary" required maxLength={5000} /></label><button className="button button-primary" type="submit">Envoyer la candidature ↗</button><p className="status" role="status">{status}</p></form></div></section>
+      <section id="candidature" className="apply"><div className="section-wrap"><p className="eyebrow">Candidature</p><h2>Demander le Badge Vert Africain</h2><form onSubmit={submitApplication}><div className="form-grid"><label>Nom de l’organisation ou du profil<input name="applicant_name" required maxLength={160} /></label><label>Email<input name="applicant_email" type="email" required /></label></div><label>Pays<select name="applicant_country" required defaultValue=""><option value="" disabled>Choisir votre pays</option>{countries.map((item) => <option key={item.code} value={item.name}>{item.name}</option>)}</select></label><label>Catégorie<select name="category" defaultValue=""><option value="">Choisir votre catégorie</option>{categoryOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Lien vers une preuve ou votre site<input name="evidence_url" type="url" placeholder="https://..." /></label><label>Présentez votre impact<textarea name="impact_summary" required maxLength={5000} /></label><button className="button button-primary" type="submit">Envoyer la candidature ↗</button><p className="status" role="status">{status}</p></form></div></section>
 
       <footer className="site-footer"><span className="brand"><span className="brand-mark"><img src={badgeUrl} alt="" /></span>Bickri <span className="brand-accent">Verified</span></span><p>© 2026 Bickri Verified · Badge Vert Africain · 54 pays.</p></footer>
     </main>
