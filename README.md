@@ -1,38 +1,34 @@
-# Badge Vert
+# Bickri Verified — Badge Vert Africain
 
-Badge Vert est une vitrine et un annuaire des organisations africaines dont l’engagement environnemental est documenté et vérifiable. Cette première version fournit une landing page responsive, un annuaire filtrable et le schéma Supabase de production.
+Plateforme de reconnaissance et d’annuaire des organisations, entrepreneurs et projets africains dont l’impact peut être documenté et vérifié.
 
-## Structure
+## Architecture
 
-- `index.html` : structure sémantique de la page et sections publiques.
-- `styles.css` : direction visuelle, responsive design et états de focus natifs.
-- `app.js` : données de démonstration et recherche/filtre côté navigateur.
-- `supabase/migrations/20260912100000_create_badge_vert.sql` : tables, types, index, RLS, politiques publiques et critères initiaux.
+- `index.html` — landing page, annuaire, méthodologie et formulaire de candidature.
+- `styles.css` — identité visuelle responsive.
+- `app.js` — connexion Supabase, lecture des organisations approuvées, recherche/filtre et dépôt des candidatures.
+- `vercel.json` — configuration de déploiement statique et en-têtes de sécurité.
+- `supabase/migrations/20260912100000_create_badge_vert.sql` — modèle PostgreSQL et RLS.
 
-## Lancer localement
+## Modules fonctionnels
 
-Le projet ne nécessite aucune dépendance pour la démonstration statique :
+1. **Annuaire public** : seules les organisations `approved` sont visibles.
+2. **Recherche et filtres** : nom, ville/pays et catégorie.
+3. **Candidature** : insertion publique contrôlée dans `badge_applications`.
+4. **Critères** : réduction de l’impact, économie circulaire, impact collectif.
+5. **Évaluation** : `organization_criteria` conserve les scores et preuves.
+6. **Cycle de badge** : `pending` → `approved` → `suspended`, avec dates d’émission et d’expiration.
 
-```bash
-python3 -m http.server 4173
-```
+## Supabase connecté
 
-Puis ouvrir `http://localhost:4173`.
+Projet utilisé : `okdohokhlkxrmxpevees` (`Bickri service agency`). Le schéma Verified est isolé dans quatre tables dédiées et protégé par Row Level Security. La clé publishable utilisée par le navigateur n’est pas une clé `service_role`.
 
-## Modèle de données
+## Déploiement Vercel
 
-Le modèle sépare les organisations, les candidatures, les critères d’évaluation et les scores documentés. Les organisations ne deviennent visibles publiquement qu’avec le statut `approved`. Les candidatures sont insérables publiquement, mais leur lecture et leur traitement doivent être réalisés par un rôle administrateur côté Supabase.
+Le projet est volontairement sans build : Vercel peut servir directement `index.html`. Le dépôt GitHub canonique est :
 
-## Supabase
+`https://github.com/mabdourahamane886-lang/bickri-verified`
 
-Aucun projet Supabase n’était accessible dans la session au moment de la livraison (`list_projects` a retourné une liste vide). La migration est donc versionnée dans GitHub mais n’a pas pu être appliquée à distance. Dès qu’un projet est connecté, appliquer la migration avec Supabase CLI :
+## Évolution recommandée
 
-```bash
-supabase db push
-```
-
-Ne jamais placer de clé `service_role` dans le navigateur. Pour brancher l’annuaire réel, remplacer le tableau de démonstration de `app.js` par un module Supabase utilisant uniquement la clé publique et les politiques RLS ci-dessus.
-
-## Vérification
-
-La structure a été contrôlée par validation HTML de base, analyse syntaxique JavaScript et lancement du serveur statique local.
+La prochaine couche doit être un espace administrateur authentifié pour examiner les candidatures, créer/modifier les organisations, attribuer les scores et publier ou suspendre les badges. Les opérations d’administration ne doivent jamais utiliser une clé privilégiée dans le navigateur.
