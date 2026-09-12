@@ -36,6 +36,8 @@ export default function HomePage() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [countries, setCountries] = useState<Country[]>(AFRICA_COUNTRIES);
   const [country, setCountry] = useState("all");
+  const [applicantCountry, setApplicantCountry] = useState("");
+  const [countrySearch, setCountrySearch] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [status, setStatus] = useState("");
@@ -48,7 +50,7 @@ export default function HomePage() {
         supabase.from("africa_countries").select("code,name,position").order("position"),
       ]);
       setOrganizations((orgs as Organization[]) ?? []);
-      if (countryRows && countryRows.length === 54) setCountries((countryRows as Country[]));
+      if (countryRows && countryRows.length === 54) setCountries(countryRows as Country[]);
     }
     loadData();
   }, []);
@@ -60,14 +62,23 @@ export default function HomePage() {
       && (category === "all" || (org.category ?? "autre").toLowerCase() === category);
   }), [organizations, search, country, category]);
 
+  const applicantCountryOptions = useMemo(() => {
+    const q = countrySearch.trim().toLowerCase();
+    return countries.filter((item) => !q || item.name.toLowerCase().includes(q));
+  }, [countries, countrySearch]);
+
   async function submitApplication(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!applicantCountry) {
+      setStatus("Veuillez sélectionner votre pays.");
+      return;
+    }
     setStatus("Envoi en cours…");
     const form = new FormData(event.currentTarget);
     const payload = {
       applicant_name: String(form.get("applicant_name") ?? ""),
       applicant_email: String(form.get("applicant_email") ?? ""),
-      applicant_country: String(form.get("applicant_country") ?? ""),
+      applicant_country: applicantCountry,
       applicant_category: String(form.get("applicant_category") ?? ""),
       evidence_url: String(form.get("evidence_url") ?? "") || null,
       impact_summary: String(form.get("impact_summary") ?? ""),
@@ -75,7 +86,11 @@ export default function HomePage() {
     if (!supabase) { setStatus("Supabase n’est pas configuré."); return; }
     const { error } = await supabase.from("badge_applications").insert(payload);
     setStatus(error ? "Impossible d’envoyer la candidature." : "Candidature envoyée avec succès.");
-    if (!error) event.currentTarget.reset();
+    if (!error) {
+      event.currentTarget.reset();
+      setApplicantCountry("");
+      setCountrySearch("");
+    }
   }
 
   return (
@@ -98,7 +113,7 @@ export default function HomePage() {
 
       <section id="obtenir" className="cta"><div className="section-wrap"><p className="eyebrow">Rejoindre le programme</p><h2>Votre identité et votre impact méritent<br /><em>d’être reconnus.</em></h2><a className="button button-light" href="#candidature">Déposer une candidature ↗</a></div></section>
 
-      <section id="candidature" className="apply"><div className="section-wrap"><p className="eyebrow">Candidature</p><h2>Demander le Badge Vert Africain</h2><form onSubmit={submitApplication}><div className="form-grid"><label>Nom de l’organisation<input name="applicant_name" required maxLength={160} /></label><label>Email<input name="applicant_email" type="email" required /></label></div><label>Pays<select name="applicant_country" required defaultValue=""><option value="" disabled>Choisir votre pays</option>{countries.map((item) => <option key={item.code} value={item.name}>{flagEmoji(item.code)} {item.name}</option>)}</select></label><label>Catégorie<select name="applicant_category" required defaultValue=""><option value="" disabled>Choisir une catégorie</option>{categories.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Lien vers une preuve ou votre site<input name="evidence_url" type="url" placeholder="https://..." /></label><label>Présentez votre impact<textarea name="impact_summary" required maxLength={5000} /></label><button className="button button-primary" type="submit">Envoyer la candidature ↗</button><p className="status" role="status">{status}</p></form></div></section>
+      <section id="candidature" className="apply"><div className="section-wrap"><p className="eyebrow">Candidature</p><h2>Demander le Badge Vert Africain</h2><form onSubmit={submitApplication}><div className="form-grid"><label>Nom de l’organisation<input name="applicant_name" required maxLength={160} /></label><label>Email<input name="applicant_email" type="email" required /></label></div><div className="country-picker-field"><label>Pays</label><div className="selected-country"><span>{applicantCountry ? `${flagEmoji(countries.find((item) => item.name === applicantCountry)?.code ?? "")} ${applicantCountry}` : "Aucun pays sélectionné"}</span><strong>{applicantCountry ? "✓ Sélectionné" : "À choisir"}</strong></div><input className="country-search-input" value={countrySearch} onChange={(e) => setCountrySearch(e.target.value)} placeholder="Rechercher votre pays…" aria-label="Rechercher votre pays" /><div className="country-picker-grid" role="listbox" aria-label="Choisir votre pays">{applicantCountryOptions.map((item) => <button key={item.code} type="button" role="option" aria-selected={applicantCountry === item.name} className={applicantCountry === item.name ? "country-choice active" : "country-choice"} onClick={() => setApplicantCountry(item.name)}><span className="country-choice-flag">{flagEmoji(item.code)}</span><span>{item.name}</span></button>)}</div><input type="hidden" name="applicant_country" value={applicantCountry} required /></div><label>Catégorie<select name="applicant_category" required defaultValue=""><option value="" disabled>Choisir une catégorie</option>{categories.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Lien vers une preuve ou votre site<input name="evidence_url" type="url" placeholder="https://..." /></label><label>Présentez votre impact<textarea name="impact_summary" required maxLength={5000} /></label><button className="button button-primary" type="submit">Envoyer la candidature ↗</button><p className="status" role="status">{status}</p></form></div></section>
 
       <footer className="site-footer"><span className="brand"><span className="brand-mark"><img src={badgeUrl} alt="" /></span>Bickri <span className="brand-accent">Verified</span></span><p>© 2026 Bickri Verified · Badge Vert Africain · 54 pays.</p></footer>
     </main>
