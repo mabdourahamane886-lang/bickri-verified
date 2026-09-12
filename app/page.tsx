@@ -9,6 +9,18 @@ const heroPhoto = "https://images.unsplash.com/photo-1644043350898-2f4ff1e17912?
 type Country = { code: string; name: string; position: number };
 type Organization = { id: string; name: string; country: string | null; category: string | null; slug: string | null };
 
+const AFRICA_COUNTRIES: Country[] = [
+  ["DZ", "Algérie"], ["AO", "Angola"], ["BJ", "Bénin"], ["BW", "Botswana"], ["BF", "Burkina Faso"], ["BI", "Burundi"],
+  ["CV", "Cap-Vert"], ["CM", "Cameroun"], ["CF", "République centrafricaine"], ["TD", "Tchad"], ["KM", "Comores"], ["CG", "Congo"],
+  ["CD", "République démocratique du Congo"], ["CI", "Côte d’Ivoire"], ["DJ", "Djibouti"], ["EG", "Égypte"], ["GQ", "Guinée équatoriale"], ["ER", "Érythrée"],
+  ["SZ", "Eswatini"], ["ET", "Éthiopie"], ["GA", "Gabon"], ["GM", "Gambie"], ["GH", "Ghana"], ["GN", "Guinée"],
+  ["GW", "Guinée-Bissau"], ["KE", "Kenya"], ["LS", "Lesotho"], ["LR", "Libéria"], ["LY", "Libye"], ["MG", "Madagascar"],
+  ["MW", "Malawi"], ["ML", "Mali"], ["MR", "Mauritanie"], ["MU", "Maurice"], ["MA", "Maroc"], ["MZ", "Mozambique"],
+  ["NA", "Namibie"], ["NE", "Niger"], ["NG", "Nigéria"], ["RW", "Rwanda"], ["ST", "São Tomé-et-Príncipe"], ["SN", "Sénégal"],
+  ["SC", "Seychelles"], ["SL", "Sierra Leone"], ["SO", "Somalie"], ["ZA", "Afrique du Sud"], ["SS", "Soudan du Sud"], ["SD", "Soudan"],
+  ["TZ", "Tanzanie"], ["TG", "Togo"], ["TN", "Tunisie"], ["UG", "Ouganda"], ["ZM", "Zambie"], ["ZW", "Zimbabwe"],
+].map(([code, name], index) => ({ code, name, position: index + 1 }));
+
 function flagEmoji(code: string) {
   return code.toUpperCase().replace(/[A-Z]/g, (letter) => String.fromCodePoint(127397 + letter.charCodeAt(0)));
 }
@@ -22,7 +34,7 @@ const categories = [
 
 export default function HomePage() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [countries, setCountries] = useState<Country[]>([]);
+  const [countries, setCountries] = useState<Country[]>(AFRICA_COUNTRIES);
   const [country, setCountry] = useState("all");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
@@ -36,7 +48,7 @@ export default function HomePage() {
         supabase.from("africa_countries").select("code,name,position").order("position"),
       ]);
       setOrganizations((orgs as Organization[]) ?? []);
-      setCountries((countryRows as Country[]) ?? []);
+      if (countryRows && countryRows.length === 54) setCountries((countryRows as Country[]));
     }
     loadData();
   }, []);
@@ -70,7 +82,7 @@ export default function HomePage() {
     <main>
       <header className="site-header"><a className="brand" href="#accueil"><span className="brand-mark"><img src={badgeUrl} alt="" /></span><span>Bickri <span className="brand-accent">Verified</span></span></a><nav className="main-nav"><a href="#badge">Le badge</a><a href="#annuaire">Annuaire</a><a href="#pays">54 pays</a><a href="#ceo">CEO</a></nav><a className="button button-dark button-small" href="#obtenir">Obtenir le badge ↗</a></header>
 
-      <section id="accueil" className="hero section-wrap"><div className="hero-copy"><p className="eyebrow"><span className="eyebrow-dot" /> Une confiance pensée pour l’Afrique</p><h1>Le <em>Badge Vert</em><br />qui inspire confiance.</h1><p className="hero-text">Bickri Verified valorise les personnes, entreprises, associations et projets africains dont l’identité, l’engagement et les preuves peuvent être examinés et reconnus.</p><div className="hero-actions"><a className="button button-primary" href="#annuaire">Explorer l’annuaire →</a><a className="text-link" href="#badge">Découvrir le badge ↘</a></div><div className="hero-proof"><span className="proof-badge"><img src={badgeUrl} alt="Badge Vert Africain" /></span><span><strong>{countries.length || 54} pays</strong><br />une identité panafricaine</span></div></div><div className="hero-photo-wrap"><img className="hero-photo" src={heroPhoto} alt="Un homme et une femme africains souriants regardant un téléphone ensemble à Lagos" /><div className="photo-caption"><img src={badgeUrl} alt="Badge Bickri Verified" /><div><strong>Confiance vérifiée</strong><span>Un repère numérique panafricain</span></div></div></div></section>
+      <section id="accueil" className="hero section-wrap"><div className="hero-copy"><p className="eyebrow"><span className="eyebrow-dot" /> Une confiance pensée pour l’Afrique</p><h1>Le <em>Badge Vert</em><br />qui inspire confiance.</h1><p className="hero-text">Bickri Verified valorise les personnes, entreprises, associations et projets africains dont l’identité, l’engagement et les preuves peuvent être examinés et reconnus.</p><div className="hero-actions"><a className="button button-primary" href="#annuaire">Explorer l’annuaire →</a><a className="text-link" href="#badge">Découvrir le badge ↘</a></div><div className="hero-proof"><span className="proof-badge"><img src={badgeUrl} alt="Badge Vert Africain" /></span><span><strong>{countries.length} pays</strong><br />une identité panafricaine</span></div></div><div className="hero-photo-wrap"><img className="hero-photo" src={heroPhoto} alt="Un homme et une femme africains souriants regardant un téléphone ensemble à Lagos" /><div className="photo-caption"><img src={badgeUrl} alt="Badge Bickri Verified" /><div><strong>Confiance vérifiée</strong><span>Un repère numérique panafricain</span></div></div></div></section>
 
       <section id="badge" className="badge-story section-light"><div className="section-wrap two-col"><div><p className="eyebrow">Le Badge Vert Africain</p><h2>Plus qu’un symbole.<br /><em>Une preuve de confiance.</em></h2></div><div className="story-copy"><p>Le badge sert de repère de confiance pour découvrir des profils africains dont les informations et les preuves sont structurées dans un système de vérification.</p><div className="feature-row"><div><b>01</b><strong>Identité claire</strong><span>Profil public et informations structurées.</span></div><div><b>02</b><strong>Preuves</strong><span>Liens, résultats et éléments vérifiables.</span></div><div><b>03</b><strong>Historique</strong><span>Émission, statut et évolution du badge.</span></div></div></div></div></section>
 
