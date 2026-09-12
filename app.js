@@ -1,33 +1,16 @@
-const organizations = [
-  { name: 'AgriSahel Coop', initials: 'AS', city: 'Niamey, Niger', category: 'agriculture', label: 'Agriculture', description: 'Agriculture régénératrice et souveraineté alimentaire.' },
-  { name: 'Niger Solar', initials: 'NS', city: 'Maradi, Niger', category: 'énergie', label: 'Énergie', description: 'Solutions solaires accessibles aux communautés rurales.' },
-  { name: 'RecycLab', initials: 'RL', city: 'Dakar, Sénégal', category: 'déchets', label: 'Déchets', description: 'Transformer les déchets plastiques en ressources locales.' },
-  { name: 'Terra Sahel', initials: 'TS', city: 'Ouagadougou, Burkina Faso', category: 'agriculture', label: 'Agriculture', description: 'Restaurer les sols et accompagner les producteurs.' },
-  { name: 'Kivu Énergie', initials: 'KE', city: 'Goma, RDC', category: 'énergie', label: 'Énergie', description: 'Mini-réseaux propres pour les territoires isolés.' },
-  { name: 'Cycle Afrique', initials: 'CA', city: 'Abidjan, Côte d’Ivoire', category: 'déchets', label: 'Déchets', description: 'Une économie circulaire pensée avec les quartiers.' },
+const SUPABASE_URL='https://okdohokhlkxrmxpevees.supabase.co';
+const SUPABASE_KEY='sb_publishable_EiTruyR5fwwHpS_PzO5_iA_d1i4iMCP';
+const demo=[
+{name:'AgriSahel Coop',city:'Niamey, Niger',category:'agriculture',description:'Agriculture régénératrice et souveraineté alimentaire.'},
+{name:'Niger Solar',city:'Maradi, Niger',category:'énergie',description:'Solutions solaires accessibles aux communautés rurales.'},
+{name:'RecycLab',city:'Dakar, Sénégal',category:'déchets',description:'Transformer les déchets plastiques en ressources locales.'},
+{name:'Terra Sahel',city:'Ouagadougou, Burkina Faso',category:'agriculture',description:'Restaurer les sols et accompagner les producteurs.'}
 ];
-
-const grid = document.querySelector('#organization-grid');
-const emptyState = document.querySelector('#empty-state');
-const searchInput = document.querySelector('#search-input');
-const categoryFilter = document.querySelector('#category-filter');
-
-function renderOrganizations() {
-  const query = searchInput.value.trim().toLocaleLowerCase('fr');
-  const category = categoryFilter.value;
-  const filtered = organizations.filter((org) => {
-    const matchesQuery = !query || `${org.name} ${org.city} ${org.description}`.toLocaleLowerCase('fr').includes(query);
-    return matchesQuery && (category === 'all' || org.category === category);
-  });
-  grid.innerHTML = filtered.map((org) => `
-    <article class="org-card">
-      <div class="org-top"><span class="org-logo" aria-hidden="true">${org.initials}</span><span class="verified">✦ Vérifié</span></div>
-      <h3>${org.name}</h3><p>${org.city}</p><p>${org.description}</p>
-      <div class="org-meta"><span class="tag">${org.label}</span><span class="tag">Badge 2026</span></div>
-    </article>`).join('');
-  emptyState.hidden = filtered.length > 0;
-}
-
-searchInput.addEventListener('input', renderOrganizations);
-categoryFilter.addEventListener('change', renderOrganizations);
-renderOrganizations();
+const grid=document.querySelector('#organization-grid'),empty=document.querySelector('#empty-state'),search=document.querySelector('#search-input'),filter=document.querySelector('#category-filter'),form=document.querySelector('#application-form'),status=document.querySelector('#form-status'),count=document.querySelector('#organization-count');
+let db=null,organizations=[];
+const esc=v=>String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\\':'&#039;'}[c]));
+const label=c=>({agriculture:'Agriculture',énergie:'Énergie',déchets:'Déchets',eau:'Eau',mobilité:'Mobilité',autre:'Autre'}[c]||c);
+function render(){const q=search.value.trim().toLocaleLowerCase('fr'),c=filter.value;const rows=organizations.filter(o=>(!q||`${o.name} ${o.city||''} ${o.country||''} ${o.description}`.toLocaleLowerCase('fr').includes(q))&&(c==='all'||o.category===c));grid.innerHTML=rows.map(o=>`<article class="org-card"><div class="org-top"><span class="org-logo">${esc(o.name.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase())}</span><span class="verified">✦ Vérifié</span></div><h3>${esc(o.name)}</h3><p>${esc([o.city,o.country].filter(Boolean).join(', '))}</p><p>${esc(o.description)}</p><div class="org-meta"><span class="tag">${esc(label(o.category))}</span><span class="tag">Badge Vert 2026</span></div></article>`).join('');empty.hidden=rows.length>0;}
+async function init(){try{if(window.supabase){db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);const r=await db.from('organizations').select('name,description,country,city,category,badge_issued_at').eq('status','approved').order('name');if(r.error)throw r.error;organizations=r.data||[];}}catch(e){console.warn('Supabase fallback',e)}if(!organizations.length)organizations=demo;count.textContent=organizations.length;render();}
+async function submit(e){e.preventDefault();if(!db){status.textContent='Service de candidature indisponible pour le moment.';return;}const f=new FormData(form),payload={applicant_name:String(f.get('applicant_name')||'').trim(),applicant_email:String(f.get('applicant_email')||'').trim(),evidence_url:String(f.get('evidence_url')||'').trim()||null,impact_summary:String(f.get('impact_summary')||'').trim()};status.textContent='Envoi…';const r=await db.from('badge_applications').insert(payload);if(r.error){status.textContent='Erreur : candidature non envoyée.';return;}form.reset();status.textContent='Candidature envoyée avec succès.';}
+search?.addEventListener('input',render);filter?.addEventListener('change',render);form?.addEventListener('submit',submit);init();
