@@ -1,34 +1,38 @@
 # Bickri Verified — Badge Vert Africain
 
-Plateforme de reconnaissance et d’annuaire des organisations, entrepreneurs et projets africains dont l’impact peut être documenté et vérifié.
+Plateforme panafricaine de reconnaissance et d’annuaire des organisations, entrepreneurs et projets africains dont l’impact et la fiabilité peuvent être documentés et vérifiés.
+
+## Nouvelle interface
+
+La version actuelle met en avant :
+
+- une identité visuelle centrée sur le Badge Vert Africain ;
+- une illustration de deux adultes africains en harmonie, avec une femme tenant un téléphone ;
+- une présentation détaillée de la valeur du badge et de son processus de vérification ;
+- un annuaire avec recherche, catégories et filtre par pays ;
+- les **54 pays d’Afrique** dans le sélecteur et le parcours de candidature ;
+- la présentation de **Mohamed Bickri Jr., Fondateur & CEO** ;
+- une candidature connectée à Supabase.
 
 ## Architecture
 
-- `index.html` — landing page, annuaire, méthodologie et formulaire de candidature.
-- `styles.css` — identité visuelle responsive.
-- `app.js` — connexion Supabase, lecture des organisations approuvées, recherche/filtre et dépôt des candidatures.
-- `vercel.json` — configuration de déploiement statique et en-têtes de sécurité.
-- `supabase/migrations/20260912100000_create_badge_vert.sql` — modèle PostgreSQL et RLS.
+- `app/page.tsx` — landing page, annuaire, couverture panafricaine, profil CEO et formulaire.
+- `app/globals.css` — identité visuelle responsive et composants de l’interface.
+- `lib/supabase.ts` — client Supabase.
+- `assets/badges/` et `public/badges/` — Badge Vert Africain.
+- `supabase/migrations/20260912100000_create_badge_vert.sql` — schéma initial.
+- `supabase/migrations/20260912174200_add_africa_countries_and_application_country.sql` — 54 pays + pays de candidature.
 
-## Modules fonctionnels
+## Supabase
 
-1. **Annuaire public** : seules les organisations `approved` sont visibles.
-2. **Recherche et filtres** : nom, ville/pays et catégorie.
-3. **Candidature** : insertion publique contrôlée dans `badge_applications`.
-4. **Critères** : réduction de l’impact, économie circulaire, impact collectif.
-5. **Évaluation** : `organization_criteria` conserve les scores et preuves.
-6. **Cycle de badge** : `pending` → `approved` → `suspended`, avec dates d’émission et d’expiration.
+Projet connecté : `okdohokhlkxrmxpevees` (`Bickri service agency`). La table `africa_countries` contient 54 entrées et est lisible publiquement via RLS. Le formulaire stocke maintenant le pays du candidat dans `badge_applications.applicant_country`.
 
-## Supabase connecté
+Les clés privilégiées ne doivent jamais être exposées dans le navigateur.
 
-Projet utilisé : `okdohokhlkxrmxpevees` (`Bickri service agency`). Le schéma Verified est isolé dans quatre tables dédiées et protégé par Row Level Security. La clé publishable utilisée par le navigateur n’est pas une clé `service_role`.
+## Déploiement
 
-## Déploiement Vercel
-
-Le projet est volontairement sans build : Vercel peut servir directement `index.html`. Le dépôt GitHub canonique est :
+Dépôt GitHub canonique :
 
 `https://github.com/mabdourahamane886-lang/bickri-verified`
 
-## Évolution recommandée
-
-La prochaine couche doit être un espace administrateur authentifié pour examiner les candidatures, créer/modifier les organisations, attribuer les scores et publier ou suspendre les badges. Les opérations d’administration ne doivent jamais utiliser une clé privilégiée dans le navigateur.
+Le projet utilise Next.js et peut être déployé sur Vercel avec les variables d’environnement Supabase appropriées.
