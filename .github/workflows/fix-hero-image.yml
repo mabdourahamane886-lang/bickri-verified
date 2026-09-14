@@ -1,0 +1,37 @@
+name: Fix Bickri Verified hero image
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix-image:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Replace broken Unsplash download URL
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('app/page.tsx')
+          s = p.read_text()
+          old = 'https://unsplash.com/photos/3VAF8cyTNZA/download?force=true&w=1600'
+          new = 'https://images.unsplash.com/photo-1546166426-a1e742a67eaa?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWd0dWN0eA%3D%3D&ixlib=rb-4.1.0&q=80&w=1600'
+          if old not in s:
+              print('No replacement needed')
+              raise SystemExit(0)
+          p.write_text(s.replace(old, new))
+          PY
+      - name: Commit image fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/page.tsx
+          git diff --cached --quiet || git commit -m 'fix: restore Bickri Verified hero image'
+          git push
