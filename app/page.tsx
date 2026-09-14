@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
 
-const HERO_IMAGE = "https://unsplash.com/photos/KzqJoH3dSCo/download?force=true&w=1600";
+const HERO_IMAGE = "https://unsplash.com/photos/3VAF8cyTNZA/download?force=true&w=1600";
 const COUNTRIES = ["Afrique du Sud","Algérie","Angola","Bénin","Botswana","Burkina Faso","Burundi","Cameroun","Cap-Vert","Comores","Côte d’Ivoire","Djibouti","Égypte","Érythrée","Eswatini","Éthiopie","Gabon","Gambie","Ghana","Guinée","Guinée-Bissau","Guinée équatoriale","Kenya","Lesotho","Libéria","Libye","Madagascar","Malawi","Mali","Maroc","Maurice","Mauritanie","Mozambique","Namibie","Niger","Nigéria","Ouganda","République centrafricaine","République démocratique du Congo","République du Congo","Rwanda","São Tomé-et-Príncipe","Sénégal","Seychelles","Sierra Leone","Somalie","Soudan","Soudan du Sud","Tanzanie","Tchad","Togo","Tunisie","Zambie","Zimbabwe"];
 
 type Country={name:string;code?:string;capital?:string;region?:string;subregion?:string;currency?:string;languages?:unknown;population?:number;area_km2?:number;timezone?:string;calling_code?:string;internet_tld?:string;description?:string};
